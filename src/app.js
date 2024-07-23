@@ -52,7 +52,7 @@ app.get('/oauth2callback', async (req, res) => {
     // fs.writeFileSync(tokensPath, JSON.stringify(tokens, null, 2));
     
     // Save the refresh token to the database
-    if (tokens.refresh_token) {
+    if (true) {
       console.log("check -1 oauth2")
       await Token.findByIdAndUpdate(
         {_id: "669f7f5945fe1c61cdba611b"},

@@ -3,14 +3,13 @@ const { google } = require('googleapis');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
-require('../db/conn');
 const startDB = require('../db/conn');
 const Token = require('../model/token'); // Adjust the path as needed
 
-// Replace with your credentials
+// Use environment variables
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
-const REDIRECT_URI ='https://access-token-jyyl.onrender.com/oauth2callback';
+const REDIRECT_URI = 'https://access-token-jyyl.onrender.com/oauth2callback';
 
 // Create an OAuth2 client
 const oauth2Client = new google.auth.OAuth2(
@@ -42,26 +41,20 @@ app.get('/auth', (req, res) => {
 // Handle the OAuth2 callback and store tokens
 app.get('/oauth2callback', async (req, res) => {
   const { code } = req.query;
-  console.log("code ",code)
+  console.log("code ", code);
   try {
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
     console.log(tokens);
-    console.log(tokens.refresh_token);
-    // Save tokens to file
-    // fs.writeFileSync(tokensPath, JSON.stringify(tokens, null, 2));
     
     // Save the refresh token to the database
-    if (true) {
-      console.log("token",tokens.refreshToken)
-      console.log("check -1 oauth2")
-      const hi=await Token.findByIdAndUpdate(
-        {_id: "669f7f5945fe1c61cdba611b"},
+    if (tokens.refresh_token) {
+      await Token.findByIdAndUpdate(
+        { _id: "669f7f5945fe1c61cdba611b" },
         { refreshToken: tokens.refresh_token }
       );
-      console.log("hi ",hi);
-      return res.status(201).json({message:"Succesfully stored refreshToken"});
       console.log('Refresh token saved to database.');
+      return res.status(201).json({ message: "Successfully stored refreshToken" });
     }
 
     res.send('Authorization successful! Tokens have been saved.');
@@ -78,13 +71,13 @@ startDB().then(() => {
 // Start the server
 const start = async () => {
   try {
-    app.listen(process.env.PORT, () => { 
-      console.log(`Server Running successfully on ${process.env.PORT}`); 
+    app.listen(process.env.PORT, () => {
+      console.log(`Server Running successfully on ${process.env.PORT}`);
       if (!tokens.refresh_token) {
         console.log(`Visit http://localhost:${process.env.PORT}/auth to authorize the app.`);
       }
     });
   } catch (err) {
-    console.log(err); 
+    console.log(err);
   }
 };

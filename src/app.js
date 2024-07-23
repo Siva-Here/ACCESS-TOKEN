@@ -54,10 +54,11 @@ app.get('/oauth2callback', async (req, res) => {
     // Save the refresh token to the database
     if (true) {
       console.log("check -1 oauth2")
-      await Token.findByIdAndUpdate(
+      const hi=await Token.findByIdAndUpdate(
         {_id: "669f7f5945fe1c61cdba611b"},
         { refreshToken: tokens.refresh_token }
       );
+      console.log("hi ",hi);
       return res.status(201).json({message:"Succesfully stored refreshToken"});
       console.log('Refresh token saved to database.');
     }

@@ -9,8 +9,7 @@ const Token = require('../model/token'); // Adjust the path as needed
 // Use environment variables
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
-const REDIRECT_URI = 'https://access-token-jyyl.onrender.com/oauth2callback';
-
+const REDIRECT_URI =process.env.REDIRECT_URI;
 // Create an OAuth2 client
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,

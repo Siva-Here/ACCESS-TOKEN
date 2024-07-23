@@ -49,7 +49,7 @@ app.get('/oauth2callback', async (req, res) => {
     console.log(tokens);
     console.log(tokens.refresh_token);
     // Save tokens to file
-    fs.writeFileSync(tokensPath, JSON.stringify(tokens, null, 2));
+    // fs.writeFileSync(tokensPath, JSON.stringify(tokens, null, 2));
     
     // Save the refresh token to the database
     if (tokens.refresh_token) {

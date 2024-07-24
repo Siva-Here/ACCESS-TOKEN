@@ -41,17 +41,21 @@ redirect_uri: REDIRECT_URI,
 // Handle the OAuth2 callback and store tokens
 app.get('/oauth2callback', async (req, res) => {
   const { code } = req.query;
-  console.log("code ", code);
+  if (!code) {
+    return res.status(400).send('Authorization code not found');
+  }
+  console.log("Received code:", code);
+
   try {
     const { tokens } = await oauth2Client.getToken(code);
     oauth2Client.setCredentials(tokens);
-    console.log(tokens);
-    
-    // Save the refresh token to the database
+    console.log("Tokens received:", tokens);
+
     if (tokens.refresh_token) {
       await Token.findByIdAndUpdate(
         { _id: "669f7f5945fe1c61cdba611b" },
-        { refreshToken: tokens.refresh_token }
+        { refreshToken: tokens.refresh_token },
+        { upsert: true }
       );
       console.log('Refresh token saved to database.');
       return res.status(201).json({ message: "Successfully stored refreshToken" });
@@ -60,9 +64,10 @@ app.get('/oauth2callback', async (req, res) => {
     res.send('Authorization successful! Tokens have been saved.');
   } catch (error) {
     console.error('Error getting tokens:', error);
-    res.send('Error getting tokens.');
+    res.status(500).send(`Error getting tokens: ${error.message}`);
   }
 });
+
 
 startDB().then(() => {
   start();

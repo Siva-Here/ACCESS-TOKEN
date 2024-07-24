@@ -1,7 +1,5 @@
 const express = require('express');
 const { google } = require('googleapis');
-const fs = require('fs');
-const path = require('path');
 require('dotenv').config();
 const startDB = require('../db/conn');
 const Token = require('../model/token'); // Adjust the path as needed
@@ -9,21 +7,14 @@ const Token = require('../model/token'); // Adjust the path as needed
 // Use environment variables
 const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
-const REDIRECT_URI =process.env.REDIRECT_URI;
+const REDIRECT_URI = process.env.REDIRECT_URI;
+
 // Create an OAuth2 client
 const oauth2Client = new google.auth.OAuth2(
   CLIENT_ID,
   CLIENT_SECRET,
   REDIRECT_URI
 );
-
-// Load tokens from file if they exist
-let tokens = {};
-const tokensPath = path.join(__dirname, 'tokens.json');
-if (fs.existsSync(tokensPath)) {
-  tokens = JSON.parse(fs.readFileSync(tokensPath, 'utf8'));
-  oauth2Client.setCredentials(tokens);
-}
 
 // Create an Express app
 const app = express();
@@ -38,7 +29,6 @@ app.get('/auth', (req, res) => {
   });
   res.redirect(authUrl);
 });
-
 
 // Handle the OAuth2 callback and store tokens
 app.get('/oauth2callback', async (req, res) => {
@@ -64,16 +54,14 @@ app.get('/oauth2callback', async (req, res) => {
       return res.status(201).json({ message: "Successfully stored refreshToken" });
     } else {
       console.log('No refresh token received.');
+      return res.status(200).send('Authorization successful but no refresh token received.');
     }
 
-    res.send('Authorization successful! Tokens have been saved.');
   } catch (error) {
     console.error('Error getting tokens:', error);
     res.status(500).send(`Error getting tokens: ${error.message}`);
   }
 });
-
-
 
 startDB().then(() => {
   start();
@@ -84,9 +72,7 @@ const start = async () => {
   try {
     app.listen(process.env.PORT, () => {
       console.log(`Server Running successfully on ${process.env.PORT}`);
-      if (!tokens.refresh_token) {
-        console.log(`Visit http://localhost:${process.env.PORT}/auth to authorize the app.`);
-      }
+      console.log(`Visit http://localhost:${process.env.PORT}/auth to authorize the app.`);
     });
   } catch (err) {
     console.log(err);

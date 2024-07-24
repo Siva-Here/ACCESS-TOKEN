@@ -3,8 +3,8 @@ const { google } = require('googleapis');
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
-const startDB = require('./db/conn');
-const Token = require('./model/token'); // Adjust the path as needed
+const startDB = require('../db/conn');
+const Token = require('../model/token'); // Adjust the path as needed
 
 // Use environment variables
 const CLIENT_ID = process.env.CLIENT_ID;

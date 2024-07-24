@@ -31,12 +31,14 @@ const app = express();
 // Generate an auth URL for obtaining the authorization code
 app.get('/auth', (req, res) => {
   const authUrl = oauth2Client.generateAuthUrl({
-    access_type: 'offline',
+    access_type: 'offline',  // Ensures refresh token is sent
     scope: ['https://www.googleapis.com/auth/drive.file'],
-redirect_uri: REDIRECT_URI,
+    prompt: 'consent',       // Forces consent screen to reappear
+    redirect_uri: REDIRECT_URI,
   });
   res.redirect(authUrl);
 });
+
 
 // Handle the OAuth2 callback and store tokens
 app.get('/oauth2callback', async (req, res) => {
@@ -51,6 +53,7 @@ app.get('/oauth2callback', async (req, res) => {
     oauth2Client.setCredentials(tokens);
     console.log("Tokens received:", tokens);
 
+    // Save the refresh token to the database
     if (tokens.refresh_token) {
       await Token.findByIdAndUpdate(
         { _id: "669f7f5945fe1c61cdba611b" },
@@ -59,6 +62,8 @@ app.get('/oauth2callback', async (req, res) => {
       );
       console.log('Refresh token saved to database.');
       return res.status(201).json({ message: "Successfully stored refreshToken" });
+    } else {
+      console.log('No refresh token received.');
     }
 
     res.send('Authorization successful! Tokens have been saved.');
@@ -67,6 +72,7 @@ app.get('/oauth2callback', async (req, res) => {
     res.status(500).send(`Error getting tokens: ${error.message}`);
   }
 });
+
 
 
 startDB().then(() => {
